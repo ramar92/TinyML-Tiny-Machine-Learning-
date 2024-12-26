@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Step Count and Turn Detection</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .info {
+      padding: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="info">
+    <p>Steps: <span id="stepCount">0</span></p>
+    <p>Last Turn: <span id="turnDirection">None</span></p>
+  </div>
+
+  <script>
+    // Initialize Leaflet map
+    const map = L.map('map').setView([51.505, -0.09], 13); // Default location
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    let marker = L.marker([13.019, 77.57]).addTo(map);
+
+    // Variables to simulate movement
+    let latitude = 51.505;
+    let longitude = -0.09;
+
+    // Simulate receiving data from Arduino
+    const simulateArduinoData = () => {
+      const data = {
+        steps: Math.floor(Math.random() * 100),
+        turn: Math.random() > 0.5 ? "Right" : "Left",
+      };
+      return data;
+    };
+
+    // Update map and UI
+    const updateUI = (data) => {
+      document.getElementById('stepCount').innerText = data.steps;
+      document.getElementById('turnDirection').innerText = data.turn;
+
+      // Update position based on turn
+      if (data.turn === "Right") {
+        longitude += 0.001;
+      } else if (data.turn === "Left") {
+        longitude -= 0.001;
+      }
+      latitude += 0.001;
+
+      // Move marker
+      marker.setLatLng([latitude, longitude]);
+      map.setView([latitude, longitude]);
+    };
+
+    // Simulate real-time updates
+    setInterval(() => {
+      const arduinoData = simulateArduinoData(); // Replace with actual Serial/BLE data
+      updateUI(arduinoData);
+    }, 1000);
+  </script>
+</body>
+</html>
